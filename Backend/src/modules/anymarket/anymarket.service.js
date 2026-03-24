@@ -10,7 +10,10 @@ const CAMPOS_REMOVIDOS_PAI = [
   'brand',
 ];
 
-const CAMPOS_REMOVIDOS_SKU = ['id', 'idVariation', 'stockLocalId'];
+const CAMPOS_REMOVIDOS_SKU = ['id', 'idVariation'];
+
+// Local de estoque padrão da conta destino
+const STOCK_LOCAL_PADRAO = 45479;
 
 /**
  * Remove campos internos de um objeto.
@@ -57,11 +60,15 @@ async function duplicarSimples({ idProdHub, novoSku, novoEan, conta = 'origem' }
 
   // 4. Atualiza lista de skus, se existir
   if (Array.isArray(produto.skus)) {
-    produto.skus = produto.skus.map((s) => ({
-      ...s,
-      partnerId: novoSku,
-      ean: novoEan,
-    }));
+    produto.skus = produto.skus.map((s) => {
+      const { id, idVariation, additionalStocks, ...sku } = s;
+      return {
+        ...sku,
+        partnerId: novoSku,
+        ean: novoEan,
+        stockLocalId: STOCK_LOCAL_PADRAO,
+      };
+    });
   }
 
   // 5. Cria o produto
@@ -130,12 +137,13 @@ async function duplicarComVariacoes({
         }
       }
 
-      // Aplica SKU e EAN da variação correspondente
+      // Aplica SKU, EAN e estoque padrão da variação correspondente
       const dadosVariacao = variacoes?.[i];
       if (dadosVariacao) {
         item.partnerId = dadosVariacao.novoSku;
         item.ean = dadosVariacao.novoEan;
       }
+      item.stockLocalId = STOCK_LOCAL_PADRAO; // substitui pelo estoque padrão
 
       return item;
     });
