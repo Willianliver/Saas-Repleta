@@ -6,8 +6,11 @@ app.use(express.json());
 
 // ─── Módulos ──────────────────────────────────────────────
 const anymarketRoutes = require('./modules/anymarket/anymarket.routes');
+const kitRoutes = require('./modules/anymarket/kit-anymarket/kit.routes');
+
 
 app.use('/anymarket', anymarketRoutes);
+app.use('/anymarket/kit-anymarket', kitRoutes);
 
 // ─── Rota de health check ─────────────────────────────────
 app.get('/', (req, res) => {
