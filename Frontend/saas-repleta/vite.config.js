@@ -10,10 +10,10 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/api': {
+      '/anymarket': {
         target: 'http://localhost:3000',
         changeOrigin: true,
-    },
-  },
-},
-})
+      }
+    }
+  }
+},);
