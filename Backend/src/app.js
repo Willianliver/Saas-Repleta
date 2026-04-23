@@ -1,8 +1,17 @@
 const express = require('express');
+import cors from 'cors';
 const app = express();
 
 // Lê JSON do body das requisições
 app.use(express.json());
+
+app.use(cors({
+  origin: 'https://saas-repleta.vercel.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(cors());
 
 // ─── Módulos ──────────────────────────────────────────────
 const anymarketRoutes = require('./modules/anymarket/anymarket.routes');
