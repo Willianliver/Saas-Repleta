@@ -1,10 +1,43 @@
-const BASE_URL = import.meta.env.VITE_API_URL || '';
+const BASE_URL = import.meta.env.VITE_API_URL;
+
+async function request(path, options = {}) {
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      },
+      ...options,
+    });
+
+    // tenta ler JSON mesmo em erro
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw {
+        status: res.status,
+        data,
+      };
+    }
+
+    return data;
+  } catch (err) {
+    // erro de rede (CORS, backend offline, etc)
+    if (!err.status) {
+      throw new Error('Erro de conexão com o servidor');
+    }
+
+    throw err;
+  }
+}
 
 export const api = {
-  get: (path) => fetch(`${BASE_URL}${path}`).then(r => r.json()),
-  post: (path, body) => fetch(`${BASE_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(r => r.json()),
+  get: (path) => request(path),
+  post: (path, body) =>
+    request(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
 };
+
+console.log('BASE_URL:', BASE_URL);
