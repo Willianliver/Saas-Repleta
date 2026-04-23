@@ -14,19 +14,6 @@ const MODULES = [
     accentBg: 'rgba(59,91,219,0.1)',
   },
   {
-    to: '/planilhas',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2" />
-        <path d="M3 9h18M3 15h18M9 3v18" />
-      </svg>
-    ),
-    title: 'Planilhas',
-    description: 'Automatize o preenchimento de planilhas com dados da API. Validação e tratamento de erros inclusos.',
-    accent: '#0d9488',
-    accentBg: 'rgba(13,148,136,0.1)',
-  },
-  {
     to: '/clonagem',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -38,6 +25,20 @@ const MODULES = [
     description: 'Duplique produtos simples ou com variações. Novos SKUs e EANs definidos manualmente.',
     accent: '#d97706',
     accentBg: 'rgba(217,119,6,0.1)',
+  },
+  {
+    to: '/caracteristicas',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+        <rect x="9" y="3" width="6" height="4" rx="1" />
+        <path d="M9 12h6M9 16h4" />
+      </svg>
+    ),
+    title: 'Características',
+    description: 'Copie características entre produtos unitariamente ou em lote, com filtro por palavras-chave.',
+    accent: '#7c3aed',
+    accentBg: 'rgba(124,58,237,0.1)',
   },
 ];
 
