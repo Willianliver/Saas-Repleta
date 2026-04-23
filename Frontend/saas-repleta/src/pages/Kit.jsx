@@ -67,7 +67,7 @@ export default function Kit() {
     setData(null);
 
     try {
-      const res = await api.get(`/api/kit/${encodeURIComponent(skuTrimmed)}`);
+      const res = await api.get(`kit/${encodeURIComponent(skuTrimmed)}`);
       const json = await res.json();
 
       if (!res.ok) {
