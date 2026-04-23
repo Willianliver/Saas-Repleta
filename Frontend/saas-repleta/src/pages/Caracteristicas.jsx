@@ -1,5 +1,5 @@
 import { useState } from 'react';
-
+import { api } from '../services/api';
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function SectionLabel({ children }) {
@@ -164,7 +164,7 @@ function CopiaUnitaria() {
     setLoading(true); setError(null); setResultado(null);
 
     try {
-      const res = await fetch('/anymarket/caracteristicas/copiar', {
+      const res = await api.post('/anymarket/caracteristicas/copiar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -308,7 +308,7 @@ function CopiaLote() {
     setLoading(true); setError(null); setResultado(null);
 
     try {
-      const res = await fetch('/anymarket/caracteristicas/copiar/lote', {
+      const res = await api.post('/anymarket/caracteristicas/copiar/lote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

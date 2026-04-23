@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { api } from '../services/api';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -105,7 +106,7 @@ function ClonagemUnitaria() {
     setResultado(null);
 
     try {
-      const res = await fetch('/anymarket/kit-anymarket/unitario', {
+      const res = await api.post('/anymarket/kit-anymarket/unitario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +338,7 @@ function ClonagemPlanilha() {
     formData.append('planilha', arquivo);
 
     try {
-      const res = await fetch('/anymarket/kit-anymarket/planilha', {
+      const res = await api.post('/anymarket/kit-anymarket/planilha', {
         method: 'POST',
         body: formData,
       });
