@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Hub de automação para gestão de produtos em e-commerce",
   "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
@@ -18,4 +19,5 @@
   "devDependencies": {
     "nodemon": "^3.0.1"
   }
+
 }
