@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import { api } from '../services/api';
 
+const BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/$/, '');
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function SectionLabel({ children }) {
@@ -74,10 +76,6 @@ function ResultCard({ label, value, accent = '#3b5bdb' }) {
 }
 
 // ─── aba unitária ────────────────────────────────────────────────────────────
-// Rota: POST /anymarket/kit/unitario
-// Body: { idProdHub, novoSku, novoEan, skuComposicao } — todos obrigatórios
-// Resposta ok:    { mensagem, dados: { ... } }
-// Resposta erro:  { erro, detalhe? }
 
 function ClonagemUnitaria() {
   const [form, setForm] = useState({
@@ -92,7 +90,6 @@ function ClonagemUnitaria() {
 
   const set = (field) => (val) => setForm(f => ({ ...f, [field]: val }));
 
-  // Todos os 4 campos são obrigatórios no backend
   const podeClonar =
     form.idProdHub.trim() &&
     form.novoSku.trim() &&
@@ -106,29 +103,22 @@ function ClonagemUnitaria() {
     setResultado(null);
 
     try {
-      const res = await api.post('/anymarket/kit-anymarket/unitario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idProdHub:     form.idProdHub.trim(),
-          novoSku:       form.novoSku.trim(),
-          novoEan:       form.novoEan.trim(),
-          skuComposicao: form.skuComposicao.trim(),
-        }),
+      // ✅ Corrigido: passa só os dados, api.post já cuida do fetch
+      const json = await api.post('/anymarket/kit-anymarket/unitario', {
+        idProdHub:     form.idProdHub.trim(),
+        novoSku:       form.novoSku.trim(),
+        novoEan:       form.novoEan.trim(),
+        skuComposicao: form.skuComposicao.trim(),
       });
 
-      const json = await res.json();
-
-      if (!res.ok) {
-        // backend retorna { erro, detalhe? }
-        setError(json.erro || json.error || 'Erro desconhecido.');
+      if (json.erro) {
+        setError(json.erro || 'Erro desconhecido.');
         return;
       }
 
-      // json = { mensagem, dados: { ... } }
       setResultado(json);
-    } catch (e) {
-      setError(`Erro de conexão: ${e.message}`);
+    } catch (err) {
+      setError(err.data?.erro || `Erro de conexão: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -191,7 +181,6 @@ function ClonagemUnitaria() {
           />
         </Field>
 
-        {/* Aviso campos obrigatórios */}
         <div style={{ fontSize: 11, color: '#4b5563', marginBottom: 16 }}>
           <span style={{ color: '#f87171' }}>*</span> Todos os campos são obrigatórios
         </div>
@@ -240,7 +229,7 @@ function ClonagemUnitaria() {
         </div>
       )}
 
-      {/* Sucesso — exibe mensagem + campos de dados retornados pelo backend */}
+      {/* Sucesso */}
       {resultado && (
         <div style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
@@ -260,7 +249,6 @@ function ClonagemUnitaria() {
               gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
               gap: 8,
             }}>
-              {/* Exibe todos os campos retornados em dados */}
               {Object.entries(resultado.dados).map(([key, val]) => (
                 <ResultCard
                   key={key}
@@ -278,10 +266,6 @@ function ClonagemUnitaria() {
 }
 
 // ─── aba por planilha ────────────────────────────────────────────────────────
-// Rota: POST /anymarket/kit/planilha
-// Form-data campo: "planilha" (arquivo .xlsx)
-// Colunas esperadas: id_prod_hub | novo_sku | novo_ean | sku_composicao
-// Resposta: { mensagem, resultados: [{ linha, novo_sku, sucesso, dados?, erro?, detalhe? }] }
 
 function StatusPill({ sucesso }) {
   const cfg = sucesso
@@ -333,12 +317,13 @@ function ClonagemPlanilha() {
     setError(null);
     setResultados([]);
 
+    // ✅ Corrigido: fetch direto para FormData — NÃO usar api.post aqui
+    // O browser define o Content-Type com boundary automaticamente
     const formData = new FormData();
-    // campo deve ser "planilha" — conforme busboy no backend
     formData.append('planilha', arquivo);
 
     try {
-      const res = await api.post('/anymarket/kit-anymarket/planilha', {
+      const res = await fetch(`${BASE_URL}/anymarket/kit-anymarket/planilha`, {
         method: 'POST',
         body: formData,
       });
@@ -346,12 +331,10 @@ function ClonagemPlanilha() {
       const json = await res.json();
 
       if (!res.ok) {
-        // backend retorna { erro, detalhe? }
         setError(json.erro || json.error || 'Erro ao processar planilha.');
         return;
       }
 
-      // json = { mensagem, resultados: [{ linha, novo_sku, sucesso, dados?, erro?, detalhe? }] }
       const rows = json.resultados || [];
       setResultados(rows);
       setProgresso({
@@ -519,7 +502,6 @@ function ClonagemPlanilha() {
               background: '#15171f', border: '1px solid #1e2130',
               borderRadius: 12, overflowX: 'auto',
             }}>
-              {/* Header */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: '52px 1fr 1fr 1fr 80px',
@@ -551,22 +533,15 @@ function ClonagemPlanilha() {
                   }}
                 >
                   <div style={{ color: '#4b5563' }}>{r.linha}</div>
-
-                  {/* novo_sku — campo snake_case do backend */}
                   <div style={{ color: '#d1d5db', fontFamily: 'monospace', fontSize: 12 }}>
                     {r.novo_sku || '—'}
                   </div>
-
-                  {/* sku gerado vem dentro de dados se existir */}
                   <div style={{ color: '#4ade80', fontFamily: 'monospace', fontSize: 12 }}>
                     {r.dados?.sku || r.dados?.partnerId || (r.sucesso ? r.novo_sku : '—')}
                   </div>
-
-                  {/* erro ou detalhe */}
                   <div style={{ color: '#f87171', fontSize: 12 }}>
                     {r.erro || r.detalhe || '—'}
                   </div>
-
                   <div><StatusPill sucesso={r.sucesso} /></div>
                 </div>
               ))}
