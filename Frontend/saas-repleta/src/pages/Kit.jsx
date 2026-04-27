@@ -66,7 +66,7 @@ export default function Kit() {
     setError(null);
     setData(null);
 
-    try {
+   try {
       const json = await api.get(`/api/kit/${encodeURIComponent(skuTrimmed)}`);
 
     if (json.erro) {
@@ -76,8 +76,9 @@ export default function Kit() {
 
       // usa json normalmente
     } catch (err) {
-      setError('Erro de conexão.');
+      setError(err.data?.erro || 'Erro de conexão.');
     }
+  };
 
   return (
     <div style={{ maxWidth: 720 }}>
