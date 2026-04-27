@@ -67,21 +67,17 @@ export default function Kit() {
     setData(null);
 
     try {
-      const res = await api.get(`api/kit/${encodeURIComponent(skuTrimmed)}`);
-      const json = await res.json();
+      const json = await api.get(`/api/kit/${encodeURIComponent(skuTrimmed)}`);
 
-      if (!res.ok) {
-        setError(json.error || 'Erro desconhecido.');
+    if (json.erro) {
+        setError(json.erro || 'Erro desconhecido.');
         return;
       }
 
-      setData(json);
-    } catch (e) {
-      setError(`Erro de conexão: ${e.message}`);
-    } finally {
-      setLoading(false);
+      // usa json normalmente
+    } catch (err) {
+      setError('Erro de conexão.');
     }
-  };
 
   return (
     <div style={{ maxWidth: 720 }}>
