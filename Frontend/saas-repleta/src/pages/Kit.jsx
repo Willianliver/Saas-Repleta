@@ -66,18 +66,22 @@ export default function Kit() {
     setError(null);
     setData(null);
 
-   try {
-      const json = await api.get(`/api/kit/${encodeURIComponent(skuTrimmed)}`);
+    try {
+  const json = await api.get(`/api/kit/${encodeURIComponent(skuTrimmed)}`);
 
-    if (json.erro) {
-        setError(json.erro || 'Erro desconhecido.');
-        return;
-      }
+  if (json.erro) {
+    setError(json.erro || 'Erro desconhecido.');
+    return;
+  }
 
-      // usa json normalmente
-    } catch (err) {
-      setError(err.data?.erro || 'Erro de conexão.');
-    }
+    setData(json); // ← adiciona isso!
+
+  } catch (err) {
+    setError(err.data?.erro || 'Erro de conexão.');
+  } finally {
+    setLoading(false); // ← e isso também estava faltando!
+  }
+
   };
 
   return (
