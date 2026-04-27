@@ -12,6 +12,7 @@ async function request(path, options = {}) {
 
     // tenta ler JSON mesmo em erro
     const data = await res.json().catch(() => null);
+    console.log('resposta da API:', res.status, data);
 
     if (!res.ok) {
       throw {
