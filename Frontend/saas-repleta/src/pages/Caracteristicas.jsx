@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../services/api';
+
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
 function SectionLabel({ children }) {
@@ -63,7 +64,6 @@ function Erro({ msg }) {
   );
 }
 
-// Campo de palavras-chave com chips
 function PalavrasChaveInput({ value, onChange }) {
   const [input, setInput] = useState('');
   const [focused, setFocused] = useState(false);
@@ -125,8 +125,6 @@ function PalavrasChaveInput({ value, onChange }) {
   );
 }
 
-// ─── log de resultado ─────────────────────────────────────────────────────────
-
 function LogBox({ log }) {
   if (!log?.length) return null;
   return (
@@ -144,16 +142,12 @@ function LogBox({ log }) {
 }
 
 // ─── aba unitária ─────────────────────────────────────────────────────────────
-// POST /anymarket/caracteristicas/copiar
-// Body: { idOrigem, idDestino, palavrasChave?, conta? }
-// Resposta ok:   { mensagem, log }
-// Resposta erro: { erro, detalhe? }
 
 function CopiaUnitaria() {
   const [form, setForm] = useState({ idOrigem: '', idDestino: '', conta: 'origem' });
   const [palavrasChave, setPalavrasChave] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError]= useState(null);
+  const [error, setError] = useState(null);
   const [resultado, setResultado] = useState(null);
 
   const set = f => v => setForm(p => ({ ...p, [f]: v }));
@@ -164,22 +158,22 @@ function CopiaUnitaria() {
     setLoading(true); setError(null); setResultado(null);
 
     try {
-      const res = await api.post('/anymarket/caracteristicas/copiar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idOrigem:     form.idOrigem.trim(),
-          idDestino:    form.idDestino.trim(),
-          palavrasChave,
-          conta:        form.conta || 'origem',
-        }),
+      // ✅ Corrigido: passa só os dados, api.post já cuida do fetch
+      const json = await api.post('/anymarket/caracteristicas/copiar', {
+        idOrigem:     form.idOrigem.trim(),
+        idDestino:    form.idDestino.trim(),
+        palavrasChave,
+        conta:        form.conta || 'origem',
       });
 
-      const json = await res.json();
-      if (!res.ok) { setError(json.erro || json.error || 'Erro desconhecido.'); return; }
+      if (json.erro) {
+        setError(json.erro || 'Erro desconhecido.');
+        return;
+      }
+
       setResultado(json); // { mensagem, log }
-    } catch (e) {
-      setError(`Erro de conexão: ${e.message}`);
+    } catch (err) {
+      setError(err.data?.erro || `Erro de conexão: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -272,9 +266,6 @@ function CopiaUnitaria() {
 }
 
 // ─── aba em lote ─────────────────────────────────────────────────────────────
-// POST /anymarket/caracteristicas/copiar/lote
-// Body: { pares: [{idOrigem, idDestino}], palavrasChave?, conta? }
-// Resposta: { mensagem, resultados: [{ linha, idOrigem, idDestino, sucesso, log?, erro?, detalhe? }] }
 
 function StatusPill({ sucesso }) {
   const cfg = sucesso
@@ -308,21 +299,21 @@ function CopiaLote() {
     setLoading(true); setError(null); setResultado(null);
 
     try {
-      const res = await api.post('/anymarket/caracteristicas/copiar/lote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pares: pares.map(p => ({ idOrigem: p.idOrigem.trim(), idDestino: p.idDestino.trim() })),
-          palavrasChave,
-          conta: conta || 'origem',
-        }),
+      // ✅ Corrigido: passa só os dados, api.post já cuida do fetch
+      const json = await api.post('/anymarket/caracteristicas/copiar/lote', {
+        pares: pares.map(p => ({ idOrigem: p.idOrigem.trim(), idDestino: p.idDestino.trim() })),
+        palavrasChave,
+        conta: conta || 'origem',
       });
 
-      const json = await res.json();
-      if (!res.ok) { setError(json.erro || json.error || 'Erro desconhecido.'); return; }
+      if (json.erro) {
+        setError(json.erro || 'Erro desconhecido.');
+        return;
+      }
+
       setResultado(json); // { mensagem, resultados }
-    } catch (e) {
-      setError(`Erro de conexão: ${e.message}`);
+    } catch (err) {
+      setError(err.data?.erro || `Erro de conexão: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -346,7 +337,6 @@ function CopiaLote() {
         Copia características de múltiplos pares de produtos. O mesmo filtro de palavras-chave se aplica a todos.
       </p>
 
-      {/* Pares */}
       <div style={{ background: '#15171f', border: '1px solid #1e2130', borderRadius: 14, padding: 24, marginBottom: 16 }}>
         <SectionLabel>Pares de produtos</SectionLabel>
 
@@ -449,7 +439,6 @@ function CopiaLote() {
 
       <Erro msg={error} />
 
-      {/* Resultados do lote */}
       {progresso && (
         <div style={{ marginTop: 4 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
@@ -468,7 +457,6 @@ function CopiaLote() {
           </div>
 
           <div style={{ background: '#15171f', border: '1px solid #1e2130', borderRadius: 12, overflow: 'hidden' }}>
-            {/* Header */}
             <div style={{
               display: 'grid', gridTemplateColumns: '44px 1fr 1fr 1fr 80px',
               padding: '10px 16px', borderBottom: '1px solid #1e2130',
@@ -498,7 +486,6 @@ function CopiaLote() {
                   <div style={{ color: '#f87171', fontSize: 12 }}>{r.erro || r.detalhe || '—'}</div>
                   <div><StatusPill sucesso={r.sucesso} /></div>
                 </div>
-                {/* Log expandido por linha se sucesso */}
                 {r.sucesso && r.log?.length > 0 && (
                   <div style={{
                     background: '#0a0b10', padding: '8px 16px 10px 60px',
@@ -537,7 +524,6 @@ export default function Caracteristicas() {
         </p>
       </div>
 
-      {/* Tabs */}
       <div style={{
         display: 'flex', gap: 4,
         background: '#0f1117', border: '1px solid #1e2130',
